@@ -2,6 +2,7 @@ export interface Product {
     storeName: string;
     name: string;
     price: number;
+    discountedPrice: number;
     url: string;
     imageUrl?: string;
     inStock: boolean;
