@@ -41,7 +41,7 @@ async function runChecks() {
 }
 
 async function main() {
-    cron.schedule("55 * * * *", runChecks, { timezone: "Europe/Belgrade" });
+    cron.schedule("0 * * * *", runChecks, { timezone: "Europe/Belgrade" });
 
     // TODO: Finish bot
 }
