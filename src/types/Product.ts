@@ -1,8 +1,8 @@
 export interface Product {
     storeName: string;
     name: string;
-    price: number;
-    discountedPrice: number;
+    price: string;
+    discountedPrice?: string;
     url: string;
     imageUrl?: string;
     inStock: boolean;
