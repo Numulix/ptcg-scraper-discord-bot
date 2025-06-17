@@ -29,6 +29,8 @@ export class DelfiScraper extends Scraper {
             const $ = cheerio.load(html);
             const productCards = $(selector).children("div");
 
+            const products: Product[] = [];
+
             productCards.each((i, element) => {
                 const card =  $(element).children().first()
                 const imageUrl = card.find("a").first().find("img").attr("src");
@@ -37,10 +39,22 @@ export class DelfiScraper extends Scraper {
                 const price = card.find("span").eq(3).text();
                 const discountedPrice = card.find("span").eq(2).text();
                 const inStock = !card.find("button").hasClass("bg-black-shadows");
-                console.log(inStock);
+                
+                if (productTitle && url && price) {
+                    products.push({
+                        storeName: "delfi",
+                        name: productTitle,
+                        price: price,
+                        discountedPrice: discountedPrice,
+                        url: url,
+                        imageUrl: imageUrl,
+                        inStock: inStock
+                    })
+                }
+
             })
 
-            return [];
+            return products;
 
         } catch (error) {
             console.error(`Error scraping: ${this.storeName} ${error}`);
@@ -52,6 +66,3 @@ export class DelfiScraper extends Scraper {
         }
     }
 }
-
-const scraper = new DelfiScraper();
-scraper.scrape();
