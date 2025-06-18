@@ -8,6 +8,7 @@ export class DelfiScraper extends Scraper {
     public readonly storeName: string = "delfi";
     public readonly baseUrl: string = "https://delfi.rs"
     public readonly itemsPerPage: number = 20;
+    public readonly logoUrl: string = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ8a-8VwRXB66uUPsUxqkEH8pGX0SYFVAsdCg&s";
 
     public async scrape(): Promise<Product[]> {
         let browser = null;

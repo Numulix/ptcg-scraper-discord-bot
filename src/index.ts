@@ -1,7 +1,17 @@
 import cron from 'node-cron';
 import { scrapers } from './scrapers/index.js';
 import { Comparator } from './core/Comparator.js';
+import 'dotenv/config';
+import { DiscordBot } from './core/DiscordBot.js';
 
+const DISCORD_TOKEN = process.env.DISCORD_TOKEN || "";
+const NOTIFICATION_CHANNEL_ID = process.env.NOTIFICATION_CHANNEL_ID || "";
+
+if (!DISCORD_TOKEN || !NOTIFICATION_CHANNEL_ID) {
+    throw new Error('Missing DISCORD_TOKEN or NOTIFICATION_CHANNEL_ID in .env file');
+}
+
+const bot = new DiscordBot(DISCORD_TOKEN);
 
 async function runChecks() {
     console.log("Running hourly check...");
@@ -29,8 +39,7 @@ async function runChecks() {
 
         if (newItems.length > 0) {
             console.log(`Found ${newItems.length} new items for ${scraper.storeName}!`);
-            // TODO: Send discord notification
-
+            await bot.sendNewProductNotification(NOTIFICATION_CHANNEL_ID, scraper.logoUrl, newItems);
             await Comparator.saveProducts(scraper.storeName, newProducts);
         } else {
             console.log(`No new items for ${scraper.storeName}`);
@@ -41,9 +50,11 @@ async function runChecks() {
 }
 
 async function main() {
+    await bot.connect();
+
     cron.schedule("0 * * * *", runChecks, { timezone: "Europe/Belgrade" });
 
-    // TODO: Finish bot
+    console.log("Bot started. Cron job scheduled.");
 }
 
 main();

@@ -7,6 +7,8 @@ export abstract class Scraper {
     public abstract readonly baseUrl: string;
     // Items per page
     public abstract readonly itemsPerPage: number;
+    // Logo url of the store for embed thumbnail
+    public abstract readonly logoUrl: string;
 
     // The main method that will be called to get products
     public abstract scrape(): Promise<Product[]>;
