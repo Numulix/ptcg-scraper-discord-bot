@@ -39,7 +39,8 @@ export class GuildCreateHandler {
             .setDescription(`Ja sam bot koji prati nove Pokemon TCG proizvode u Srbiji.\n\n` +
                 `**Kako koristiti bota:**\n` +
                 `Da biste registrovali kanal za obaveštenja, koristite komandu \`/register\` u željeni kanal.\n` +
-                `Da biste primili notifikacije, **reagujte sa ${REACTION_EMOJI} na ovu poruku** i dobićete **@${role.name}** rolu.`
+                `Da biste primili notifikacije, **reagujte sa ${REACTION_EMOJI} na ovu poruku** i dobićete **@${role.name}** rolu.\n` +
+                `Ukoliko želite da isključite notifikacije, jednostavno uklonite reakciju.`
             )
             .addFields({
                 name: '🚨 VAŽNO: Za admine',
