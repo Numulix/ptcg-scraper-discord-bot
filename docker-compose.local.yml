@@ -2,9 +2,12 @@ version: '3.8'
 
 services:
   pokeserbia-bot:
-    image: ghcr.io/numulix/ptcg-scraper-discord-bot:latest
-    container-name: pokeserbia-bot
+    container_name: pokeserbia-bot-local-test
     restart: unless-stopped
+
+    build:
+      context: .
+      dockerfile: Dockerfile
 
     environment:
       - NODE_ENV=production

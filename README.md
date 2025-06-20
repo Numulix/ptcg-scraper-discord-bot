@@ -30,7 +30,7 @@ Currently, it supports scraping from the following stores:
 Scrapers that have yet to be implemented:
 - [Kraken](https://www.kraken.rs/)
 - [Games4You](https://games4you.rs/)
-- Games.rs
+- [Games.rs](https://games.rs/)
 - (easily extendible for more stores)
 
 ## Key Features
