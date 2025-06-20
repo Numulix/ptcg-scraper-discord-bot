@@ -1,0 +1,51 @@
+import { CommandInteraction, MessageFlags, PermissionsBitField, TextChannel } from "discord.js";
+import { Discord, Slash } from "discordx";
+import { ServerConfigManager } from "../core/ServerConfigManager.js";
+
+@Discord()
+export class ChannelManagement {
+
+    @Slash({
+        name: "register",
+        description: "Sets this channel to receive stock notifications",
+        defaultMemberPermissions: [PermissionsBitField.Flags.Administrator]
+    })
+    async registerChannel(interaction: CommandInteraction): Promise<void> {
+        if (!interaction.guildId || !interaction.channel) {
+            await interaction.reply({ content: "This command can only be used in a server channel", flags: MessageFlags.Ephemeral });
+            return;
+        }
+
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
+        await ServerConfigManager.setNotificationChannel(interaction.guildId, interaction.channelId);
+
+        const channelMention = interaction.channel as TextChannel;
+        await interaction.editReply(`✅ Success! **${channelMention.name}** will now receive stock notifications. If another channel was previously set, this one has replaced it.`);
+    }
+
+    @Slash({
+        name: "unregister",
+        description: "Stops sending stock notifications to this server",
+        defaultMemberPermissions: [PermissionsBitField.Flags.Administrator]
+    })
+    async unregisterChannel(interaction: CommandInteraction): Promise<void> {
+        if (!interaction.guildId) {
+            await interaction.reply({ content: "This command can only be used in a server.", flags: MessageFlags.Ephemeral });
+            return;
+        }
+
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
+        const currentConfig = await ServerConfigManager.getConfig(interaction.guildId);
+
+        if (!currentConfig.notificationChannelId) {
+            await interaction.editReply("ℹ️ No notification channel is currently registered for this server.");
+            return;
+        }
+
+        await ServerConfigManager.clearNotificationsChannel(interaction.guildId);
+
+        await interaction.editReply("✅ Success! The bot will no longer send stock notifications to this server until a new channel is registered.")
+    }
+}
