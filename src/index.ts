@@ -91,7 +91,7 @@ async function main() {
 
     await bot.connect();
 
-    cron.schedule("25 * * * *", runChecks, { timezone: "Europe/Belgrade" });
+    cron.schedule("0 * * * *", runChecks, { timezone: "Europe/Belgrade" });
 
     console.log("Bot started. Cron job scheduled.");
 }
