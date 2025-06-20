@@ -1,6 +1,7 @@
 import { EmbedBuilder, GatewayIntentBits, Partials, TextChannel } from "discord.js";
 import { Client } from "discordx";
 import { Product } from "../types/Product.js";
+import { logger } from "./Logger.js";
 
 const PRODUCTS_PER_EMBED = 10;
 
@@ -26,7 +27,7 @@ export class DiscordBot {
     public connect(): Promise<void> {
         return new Promise((resolve) => {
             this.client.once('ready', () => {
-                console.log(`Logged in as ${this.client.user?.tag}`);
+                logger.info(`Discord bot is ready as ${this.client.user?.tag}`);
                 this.client.initApplicationCommands();
                 resolve();
             });
@@ -49,7 +50,7 @@ export class DiscordBot {
 
         const channel = await this.client.channels.fetch(channelId);
         if (!channel || !(channel instanceof TextChannel)) {
-            console.error(`Channel with ID ${channelId} not found or is not a text channel.`);
+            logger.error(`Channel with ID ${channelId} not found or is not a text channel.`);
             return;
         }
 

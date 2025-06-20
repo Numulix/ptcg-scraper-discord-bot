@@ -7,26 +7,26 @@ import { importx } from '@discordx/importer';
 import { dirname } from 'path';
 import { ServerConfigManager } from './core/ServerConfigManager.js';
 import { fileURLToPath } from 'url';
+import { logger } from './core/Logger.js';
 
 const DISCORD_TOKEN = process.env.DISCORD_TOKEN || "";
-const NOTIFICATION_CHANNEL_ID = process.env.NOTIFICATION_CHANNEL_ID || "";
 
-if (!DISCORD_TOKEN || !NOTIFICATION_CHANNEL_ID) {
-    throw new Error('Missing DISCORD_TOKEN or NOTIFICATION_CHANNEL_ID in .env file');
+if (!DISCORD_TOKEN) {
+    throw new Error('Missing DISCORD_TOKEN in .env file');
 }
 
 const bot = new DiscordBot(DISCORD_TOKEN);
 
 async function runChecks() {
-    console.log("Running hourly check...");
+    logger.info("Running hourly check...");
 
     for (const scraper of scrapers) {
-        console.log(`Scraping ${scraper.storeName}...`);
+        logger.info(`Scraping ${scraper.storeName}...`);
         const newProducts = await scraper.scrape();
 
         // Skip if scraping failed :(
         if (newProducts.length === 0) {
-            console.log(`No products found for ${scraper.storeName}, skipping`);
+            logger.warn(`No products found for ${scraper.storeName}, skipping`);
             continue;
         }
 
@@ -34,7 +34,7 @@ async function runChecks() {
 
         // If this is the first time we are saving a store, save and do nothing afterwards
         if (oldProducts.length === 0) {
-            console.log(`Initial product list saved for ${scraper.storeName}`);
+            logger.info(`Initial product list saved for ${scraper.storeName}`);
             await Comparator.saveProducts(scraper.storeName, newProducts);
             continue;
         }
@@ -42,14 +42,14 @@ async function runChecks() {
         const newItems = Comparator.findNewProducts(oldProducts, newProducts);
 
         if (newItems.length > 0) {
-            console.log(`Found ${newItems.length} new items for ${scraper.storeName}!`);
+            logger.info(`Found ${newItems.length} new items for ${scraper.storeName}!`);
             
             // 1. Get all server configurations
             const allConfigs = await ServerConfigManager.getAllConfigs();
             const serverIds = Object.keys(allConfigs);
 
             if (serverIds.length === 0) {
-                console.warn("No servers have configured this bot.");
+                logger.warn("No servers have configured this bot.");
                 continue;
             }
 
@@ -68,18 +68,18 @@ async function runChecks() {
                             config.pingRoleId || ""
                         )
                     } catch (error) {
-                        console.error(`Failed to send notification to channel ${config.notificationChannelId} in guild ${guildId}.`, error);
+                        logger.error(`Failed to send notification to channel ${config.notificationChannelId} in guild ${guildId}.`, error);
                     }
                 }
             }
 
             await Comparator.saveProducts(scraper.storeName, newProducts);
         } else {
-            console.log(`No new items for ${scraper.storeName}`);
+            logger.info(`No new items found for ${scraper.storeName}. Skipping notification.`);
         }
     }
 
-    console.log("Hourly check finished.")
+    logger.info("Hourly check finished.");
 }
 
 async function main() {
@@ -93,7 +93,7 @@ async function main() {
 
     cron.schedule("0 * * * *", runChecks, { timezone: "Europe/Belgrade" });
 
-    console.log("Bot started. Cron job scheduled.");
+    logger.info("Bot started. Cron job scheduled.");
 }
 
 main();

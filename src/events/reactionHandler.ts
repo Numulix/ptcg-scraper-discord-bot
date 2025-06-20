@@ -1,7 +1,8 @@
 import * as discordx from "discordx";
 import { ReactionRoleManager } from "../core/ReactionRoleManager.js";
+import { logger } from "../core/Logger.js";
 
-console.log("✅ reactionHandler.ts event handler file has been loaded by the importer.");
+logger.info("✅ ReactionHandler event handler loaded successfully.");
 
 @discordx.Discord()
 export class ReactionHandler {
@@ -25,10 +26,10 @@ export class ReactionHandler {
 
             if (role && member) {
                 await member.roles.add(role, "Added via reaction role system");
-                console.log(`Added role ${role.name} to user ${user.username} in guild ${guild.name}`);
+                logger.info(`Added role ${role.name} to user ${user.username} in guild ${guild.name}`);
             }
         } catch (error) {
-            console.error(`Failed to add role for reaction in guild ${reaction.message.guild?.name}:`, error);
+            logger.error(`Failed to add role for reaction in guild ${reaction.message.guild?.name}:`, error);
         }
     }
 
@@ -51,10 +52,10 @@ export class ReactionHandler {
 
             if (role && member) {
                 await member.roles.remove(role, "Removed via reaction role system");
-                console.log(`Removed role ${role.name} from user ${user.username} in guild ${guild.name}`);
+                logger.info(`Removed role ${role.name} from user ${user.username} in guild ${guild.name}`);
             }
         } catch (error) {
-            console.error(`Failed to remove role for reaction in guild ${reaction.message.guild?.name}:`, error);
+            logger.error(`Failed to remove role for reaction in guild ${reaction.message.guild?.name}:`, error);
         }
     }
 }

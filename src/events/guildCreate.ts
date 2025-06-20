@@ -2,8 +2,9 @@ import { EmbedBuilder, Guild, PermissionsBitField, TextChannel } from "discord.j
 import * as discordx from "discordx";
 import { ReactionRoleManager } from "../core/ReactionRoleManager.js";
 import { ServerConfigManager } from "../core/ServerConfigManager.js";
+import { logger } from "../core/Logger.js";
 
-console.log("✅ guildCreate.ts event handler file has been loaded by the importer.");
+logger.info("✅ guildCreate.ts event handler file has been loaded by the importer.");
 
 const REACTION_EMOJI = "🎉";
 
@@ -11,12 +12,12 @@ const REACTION_EMOJI = "🎉";
 export class GuildCreateHandler {
     @discordx.On({ event: "guildCreate" })
     async onGuildCreate([guild]: discordx.ArgsOf<"guildCreate">): Promise<void> {
-        console.log(`Joined a new guild: ${guild.name} (ID: ${guild.id})`);
+        logger.info(`Joined a new guild: ${guild.name} (ID: ${guild.id})`);
         
         // Step 1: Find a suitable channel to send a welcome message
         const channel = this.findWelcomeChannel(guild);
         if (!channel) {
-            console.error(`No suitable channel found in guild: ${guild.name} (ID: ${guild.id})`);
+            logger.error(`No suitable channel found in guild: ${guild.name} (ID: ${guild.id})`);
             return;
         }
 
@@ -26,7 +27,7 @@ export class GuildCreateHandler {
             color: "#5865F2",
             reason: "Role for Pokemon TCG stock notifications"
         }).catch(error => {
-            console.error(`Failed to create role in guild: ${guild.name} (ID: ${guild.id})`, error);
+            logger.error(`Failed to create role in guild: ${guild.name} (ID: ${guild.id})`, error);
             return null;
         });
 
@@ -51,7 +52,7 @@ export class GuildCreateHandler {
             })
         
         const message = await channel.send({ embeds: [welcomeEmbed] }).catch(error => {
-            console.error(`Failed to send welcome message in guild: ${guild.name} (ID: ${guild.id})`, error);
+            logger.error(`Failed to send welcome message in guild: ${guild.name} (ID: ${guild.id})`, error);
             return null;
         });
 
@@ -69,7 +70,7 @@ export class GuildCreateHandler {
 
         await ServerConfigManager.setRoleId(guild.id, role.id);
 
-        console.log(`Successfully set up welcome message and reaction role in guild: ${guild.name} (ID: ${guild.id})`);
+        logger.info(`Successfully set up welcome message and reaction role in guild: ${guild.name} (ID: ${guild.id})`);
     }
 
     private findWelcomeChannel(guild: Guild): TextChannel | undefined {
