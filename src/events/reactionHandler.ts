@@ -1,11 +1,13 @@
-import { ArgsOf, Discord, On } from "discordx";
+import * as discordx from "discordx";
 import { ReactionRoleManager } from "../core/ReactionRoleManager.js";
 
-@Discord()
+console.log("✅ reactionHandler.ts event handler file has been loaded by the importer.");
+
+@discordx.Discord()
 export class ReactionHandler {
     // Handler for when user ADDS a reaction to the welcome messsage
-    @On({ event: "messageReactionAdd" })
-    async onReactionAdd([reaction, user]: ArgsOf<"messageReactionAdd">): Promise<void> {
+    @discordx.On({ event: "messageReactionAdd" })
+    async onReactionAdd([reaction, user]: discordx.ArgsOf<"messageReactionAdd">): Promise<void> {
         // Ignore reactions from bots
         if (user.bot) return;
 
@@ -31,8 +33,8 @@ export class ReactionHandler {
     }
 
     // Handler for when user REMOVES a reaction from the welcome message
-    @On({ event: "messageReactionRemove" })
-    async onReactionRemove([reaction, user]: ArgsOf<"messageReactionRemove">): Promise<void> {
+    @discordx.On({ event: "messageReactionRemove" })
+    async onReactionRemove([reaction, user]: discordx.ArgsOf<"messageReactionRemove">): Promise<void> {
         // Ignore reactions from bots
         if (user.bot) return;
 

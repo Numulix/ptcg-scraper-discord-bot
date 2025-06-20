@@ -5,6 +5,8 @@ import 'dotenv/config';
 import { DiscordBot } from './core/DiscordBot.js';
 import { importx } from '@discordx/importer';
 import { dirname } from 'path';
+import { ServerConfigManager } from './core/ServerConfigManager.js';
+import { fileURLToPath } from 'url';
 
 const DISCORD_TOKEN = process.env.DISCORD_TOKEN || "";
 const NOTIFICATION_CHANNEL_ID = process.env.NOTIFICATION_CHANNEL_ID || "";
@@ -41,7 +43,36 @@ async function runChecks() {
 
         if (newItems.length > 0) {
             console.log(`Found ${newItems.length} new items for ${scraper.storeName}!`);
-            await bot.sendNewProductNotification(NOTIFICATION_CHANNEL_ID, scraper.logoUrl, newItems);
+            
+            // 1. Get all server configurations
+            const allConfigs = await ServerConfigManager.getAllConfigs();
+            const serverIds = Object.keys(allConfigs);
+
+            if (serverIds.length === 0) {
+                console.warn("No servers have configured this bot.");
+                continue;
+            }
+
+            // 2. Loop through each server that has a configuration
+            for (const guildId of serverIds) {
+                const config = allConfigs[guildId];
+
+                // 3. Check if a notification channel is set for the server
+                if (config?.notificationChannelId) {
+                    try {
+
+                        await bot.sendNewProductNotification(
+                            config.notificationChannelId,
+                            scraper.logoUrl,
+                            newItems,
+                            config.pingRoleId || ""
+                        )
+                    } catch (error) {
+                        console.error(`Failed to send notification to channel ${config.notificationChannelId} in guild ${guildId}.`, error);
+                    }
+                }
+            }
+
             await Comparator.saveProducts(scraper.storeName, newProducts);
         } else {
             console.log(`No new items for ${scraper.storeName}`);
@@ -52,10 +83,15 @@ async function runChecks() {
 }
 
 async function main() {
-    await importx(`${dirname(import.meta.url)}/{commands,events}/**/*.{js,ts}`)
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = dirname(__filename);
+    const globPattern = `${__dirname}/{commands,events}/**/*.{js,ts}`;
+
+    await importx(globPattern);
+
     await bot.connect();
 
-    cron.schedule("0 * * * *", runChecks, { timezone: "Europe/Belgrade" });
+    cron.schedule("25 * * * *", runChecks, { timezone: "Europe/Belgrade" });
 
     console.log("Bot started. Cron job scheduled.");
 }

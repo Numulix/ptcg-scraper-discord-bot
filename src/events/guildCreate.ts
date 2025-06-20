@@ -1,14 +1,16 @@
 import { EmbedBuilder, Guild, PermissionsBitField, TextChannel } from "discord.js";
-import { ArgsOf, Discord, On } from "discordx";
+import * as discordx from "discordx";
 import { ReactionRoleManager } from "../core/ReactionRoleManager.js";
 import { ServerConfigManager } from "../core/ServerConfigManager.js";
 
+console.log("✅ guildCreate.ts event handler file has been loaded by the importer.");
+
 const REACTION_EMOJI = "🎉";
 
-@Discord()
+@discordx.Discord()
 export class GuildCreateHandler {
-    @On({ event: "guildCreate" })
-    async onGuildCreate([guild]: ArgsOf<"guildCreate">): Promise<void> {
+    @discordx.On({ event: "guildCreate" })
+    async onGuildCreate([guild]: discordx.ArgsOf<"guildCreate">): Promise<void> {
         console.log(`Joined a new guild: ${guild.name} (ID: ${guild.id})`);
         
         // Step 1: Find a suitable channel to send a welcome message

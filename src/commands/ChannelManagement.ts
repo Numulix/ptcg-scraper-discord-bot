@@ -2,6 +2,8 @@ import { CommandInteraction, MessageFlags, PermissionsBitField, TextChannel } fr
 import { Discord, Slash } from "discordx";
 import { ServerConfigManager } from "../core/ServerConfigManager.js";
 
+console.log("✅ ChannelManagement file has been loaded by the importer.");
+
 @Discord()
 export class ChannelManagement {
 
@@ -12,17 +14,23 @@ export class ChannelManagement {
     })
     async registerChannel(interaction: CommandInteraction): Promise<void> {
         if (!interaction.guildId || !interaction.channel) {
-            await interaction.reply({ content: "This command can only be used in a server channel", flags: MessageFlags.Ephemeral });
+            await interaction.reply({ content: "This command can only be used in a server channel", flags: [MessageFlags.Ephemeral] });
             return;
         }
 
-        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+        await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
-        await ServerConfigManager.setNotificationChannel(interaction.guildId, interaction.channelId);
-
-        const channelMention = interaction.channel as TextChannel;
-        await interaction.editReply(`✅ Success! **${channelMention.name}** will now receive stock notifications. If another channel was previously set, this one has replaced it.`);
-    }
+        try {
+            await ServerConfigManager.setNotificationChannel(interaction.guildId, interaction.channelId);
+            const channelMention = interaction.channel as TextChannel;
+            await interaction.editReply(`✅ Success! **${channelMention.name}** will now receive stock notifications. If another channel was previously set, this one has replaced it.`);
+        } catch (error) {
+            console.error(`[ERROR] Failed to execute /register for guild ${interaction.guildId}:`, error);
+            await interaction.editReply({ 
+                content: "❌ An unexpected error occurred while trying to register this channel. Please check the bot's console logs for more details." 
+            });
+        }
+       }
 
     @Slash({
         name: "unregister",

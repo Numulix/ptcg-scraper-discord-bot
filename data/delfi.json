@@ -10,15 +10,6 @@
   },
   {
     "storeName": "delfi",
-    "name": "Trainer Box Set - Pokemon TCG, SV10 Elite",
-    "price": "6.999,00 RSD",
-    "discountedPrice": "5.669,19 RSD",
-    "url": "https://delfi.rs/gift/231139-trainer-box-set--pokemon-tcg-sv10-elite-gift-delfi-knjizare.html",
-    "imageUrl": "https://delfi.rs/_img/artikli/Gift/231139/v/1749716636-image-26.jpg",
-    "inStock": true
-  },
-  {
-    "storeName": "delfi",
     "name": "Karte - Pokemon TCG, SV04 Checklane Blister, assorted",
     "price": "799,00 RSD",
     "discountedPrice": "647,19 RSD",
@@ -42,7 +33,7 @@
     "discountedPrice": "5.669,19 RSD",
     "url": "https://delfi.rs/gift/231136-trainer-box-set--pokemon-tcg-sv09-elite-gift-delfi-knjizare.html",
     "imageUrl": "https://delfi.rs/_img/artikli/Gift/231136/v/1749716304-image-18.jpg",
-    "inStock": false
+    "inStock": true
   },
   {
     "storeName": "delfi",
@@ -159,7 +150,7 @@
     "discountedPrice": "760,59 RSD",
     "url": "https://delfi.rs/gift/228680-karte--pokemon-tcg-sv02-paldea-evolved-premium-checklane-blister-gift-delfi-knjizare.html",
     "imageUrl": "https://delfi.rs/_img/artikli/Gift/228680/v/1746529266-image-11.jpg",
-    "inStock": true
+    "inStock": false
   },
   {
     "storeName": "delfi",
@@ -232,6 +223,15 @@
     "url": "https://delfi.rs/gift/217371-karte--pokemon-tcg-sv65-3-pack-blister-12ct-gift-delfi-knjizare.html",
     "imageUrl": "https://delfi.rs/_img/artikli/Gift/217371/v/1725444260-s-l1600-2.jpg",
     "inStock": true
+  },
+  {
+    "storeName": "delfi",
+    "name": "Trainer Box Set - Pokemon TCG, SV10 Elite",
+    "price": "6.999,00 RSD",
+    "discountedPrice": "5.669,19 RSD",
+    "url": "https://delfi.rs/gift/231139-trainer-box-set--pokemon-tcg-sv10-elite-gift-delfi-knjizare.html",
+    "imageUrl": "https://delfi.rs/_img/artikli/Gift/231139/v/1749716636-image-26.jpg",
+    "inStock": false
   },
   {
     "storeName": "delfi",

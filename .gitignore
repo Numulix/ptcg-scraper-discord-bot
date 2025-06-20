@@ -31,3 +31,6 @@ Thumbs.db
 
 # ENV files
 .env*
+
+# JSON data
+/data

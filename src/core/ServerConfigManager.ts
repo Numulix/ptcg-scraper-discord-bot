@@ -14,7 +14,7 @@ const DATA_DIR = path.join(process.cwd(), 'data');
 const CONFIG_FILE_PATH = path.join(DATA_DIR, 'server-configs.json');
 
 export class ServerConfigManager {
-    private static async getAllConfigs(): Promise<AllConfigs> {
+    public static async getAllConfigs(): Promise<AllConfigs> {
         try {
             await fs.mkdir(DATA_DIR, { recursive: true });
             const data = await fs.readFile(CONFIG_FILE_PATH, 'utf-8');

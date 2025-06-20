@@ -1,4 +1,4 @@
-import { EmbedBuilder, GatewayIntentBits, TextChannel } from "discord.js";
+import { EmbedBuilder, GatewayIntentBits, Partials, TextChannel } from "discord.js";
 import { Client } from "discordx";
 import { Product } from "../types/Product.js";
 
@@ -6,7 +6,19 @@ const PRODUCTS_PER_EMBED = 10;
 
 export class DiscordBot {
     private client = new Client({
-        intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages]
+        intents: [
+            GatewayIntentBits.Guilds, 
+            GatewayIntentBits.GuildMessages,
+            GatewayIntentBits.GuildMessageReactions,
+            GatewayIntentBits.GuildMembers,
+            GatewayIntentBits.MessageContent
+        ],
+        partials: [
+            Partials.Message,
+            Partials.Channel,
+            Partials.Reaction
+        ],
+        silent: false
     });
 
     constructor (private token: string) {}
@@ -15,13 +27,22 @@ export class DiscordBot {
         return new Promise((resolve) => {
             this.client.once('ready', () => {
                 console.log(`Logged in as ${this.client.user?.tag}`);
+                this.client.initApplicationCommands();
                 resolve();
             });
+            this.client.on("interactionCreate", (interaction) => {
+                this.client.executeInteraction(interaction);
+            })
             this.client.login(this.token);
         })
     }
 
-    public async sendNewProductNotification(channelId: string, logoUrl: string, products: Product[]): Promise<void> {
+    public async sendNewProductNotification(
+        channelId: string, 
+        logoUrl: string, 
+        products: Product[], 
+        roleId: string
+    ): Promise<void> {
         if (products.length === 0) {
             return;
         }
@@ -32,6 +53,7 @@ export class DiscordBot {
             return;
         }
 
+        const messageContent = roleId ? `<@&${roleId}>` : "";
         const storeName = products[0]!.storeName;
 
         // Handling the case of one product
@@ -51,7 +73,8 @@ export class DiscordBot {
                 .setTimestamp()
                 .setThumbnail(logoUrl);
 
-            await channel.send({ embeds: [embed] });
+
+            await channel.send({ content: messageContent ,embeds: [embed] });
             return;
         }
 
@@ -73,7 +96,8 @@ export class DiscordBot {
                 })
             }
 
-            await channel.send({ embeds: [embed] });
+            const contentForFirstChunk = (i === 0) ? messageContent : undefined; 
+            await channel.send({ content: contentForFirstChunk, embeds: [embed] });
         }
     }
 }
