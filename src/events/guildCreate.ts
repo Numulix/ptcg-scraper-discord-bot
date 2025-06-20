@@ -1,6 +1,7 @@
 import { EmbedBuilder, Guild, PermissionsBitField, TextChannel } from "discord.js";
 import { ArgsOf, Discord, On } from "discordx";
-import { ReactionRoleManager } from "../core/ReactionRoleManager";
+import { ReactionRoleManager } from "../core/ReactionRoleManager.js";
+import { ServerConfigManager } from "../core/ServerConfigManager.js";
 
 const REACTION_EMOJI = "🎉";
 
@@ -63,6 +64,8 @@ export class GuildCreateHandler {
             roleId: role.id,
             emoji: REACTION_EMOJI
         });
+
+        await ServerConfigManager.setRoleId(guild.id, role.id);
 
         console.log(`Successfully set up welcome message and reaction role in guild: ${guild.name} (ID: ${guild.id})`);
     }

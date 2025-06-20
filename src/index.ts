@@ -3,6 +3,8 @@ import { scrapers } from './scrapers/index.js';
 import { Comparator } from './core/Comparator.js';
 import 'dotenv/config';
 import { DiscordBot } from './core/DiscordBot.js';
+import { importx } from '@discordx/importer';
+import { dirname } from 'path';
 
 const DISCORD_TOKEN = process.env.DISCORD_TOKEN || "";
 const NOTIFICATION_CHANNEL_ID = process.env.NOTIFICATION_CHANNEL_ID || "";
@@ -50,6 +52,7 @@ async function runChecks() {
 }
 
 async function main() {
+    await importx(`${dirname(import.meta.url)}/{commands,events}/**/*.{js,ts}`)
     await bot.connect();
 
     cron.schedule("0 * * * *", runChecks, { timezone: "Europe/Belgrade" });
