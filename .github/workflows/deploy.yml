@@ -42,7 +42,7 @@ jobs:
                 username: ${{ secrets.VPS_USERNAME }}
                 password: ${{ secrets.VPS_SSH_PASSWORD }}
                 script: |
-                    cd /ptcg-scraper-discord-bot
+                    cd ptcg-scraper-discord-bot/
                     docker compose pull
                     docker compose up -d
                     docker image prune -af
