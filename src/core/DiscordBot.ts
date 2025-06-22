@@ -2,6 +2,11 @@ import { EmbedBuilder, GatewayIntentBits, Partials, TextChannel } from "discord.
 import { Client } from "discordx";
 import { Product } from "../types/Product.js";
 import { logger } from "./Logger.js";
+import { createSingleNewEmbed } from "./embeds/SingleNewEmbed.js";
+import { createNewChunkEmbed } from "./embeds/MultiNewEmbed.js";
+import { PingEnum } from "../types/PingEnum.js";
+import { createSingleRestockEmbed } from "./embeds/SingleRestockEmbed.js";
+import { createRestockChunkEmbed } from "./embeds/MultiRestockEmbed.js";
 
 const PRODUCTS_PER_EMBED = 10;
 
@@ -42,7 +47,8 @@ export class DiscordBot {
         channelId: string, 
         logoUrl: string, 
         products: Product[], 
-        roleId: string
+        roleId: string,
+        pingType: PingEnum
     ): Promise<void> {
         if (products.length === 0) {
             return;
@@ -57,48 +63,38 @@ export class DiscordBot {
         const messageContent = roleId ? `<@&${roleId}>` : "";
         const storeName = products[0]!.storeName;
 
-        // Handling the case of one product
-        if (products.length === 1) {
-            const product = products[0];
+        switch (pingType) {
+            case PingEnum.SINGLE_NEW: {
+                const embed = createSingleNewEmbed(products[0]!, logoUrl);
+                await channel.send({ content: messageContent, embeds: [embed] });
+                break;
+            }
+            case PingEnum.SINGLE_RESTOCK: {
+                const embed = createSingleRestockEmbed(products[0]!, logoUrl);
+                await channel.send({ content: messageContent, embeds: [embed] });
+                break;
+            }
+            case PingEnum.MULTIPLE_NEW:
+            case PingEnum.MULTIPLE_RESTOCK: {
+                // This is the corrected ternary operator
+                const multiEmbedBuilder = (pingType === PingEnum.MULTIPLE_NEW)
+                    ? createNewChunkEmbed
+                    : createRestockChunkEmbed;
 
-            const embed = new EmbedBuilder()
-                .setColor(0x0099FF)
-                .setTitle(product!.name)
-                .setURL(product!.url)
-                .setDescription(`Novi proizvod je dostupan u radnji **${storeName.toUpperCase()}**!`)
-                .addFields(
-                    { name: 'Cena', value: product?.price || '', inline: true },
-                    { name: 'Cena sa popustom', value: product?.discountedPrice || '', inline: true }
-                )
-                .setImage(product?.imageUrl || '')
-                .setTimestamp()
-                .setThumbnail(logoUrl);
-
-
-            await channel.send({ content: messageContent ,embeds: [embed] });
-            return;
-        }
-
-        for (let i = 0; i < products.length; i += PRODUCTS_PER_EMBED) {
-            const chunk = products.slice(i, i + PRODUCTS_PER_EMBED);
-
-            const embed = new EmbedBuilder()
-                .setColor(0x0099FF)
-                .setTitle(`Pronadjeno ${products.length} novih proizvoda u radnji **${storeName.toUpperCase()}**`)
-                .setDescription(`Prikazani proizvodi ${i+1}-${i + chunk.length} od ${products.length}`)
-                .setThumbnail(products[0]?.imageUrl || "")
-                .setTimestamp()
-            
-            for (const prod of chunk) {
-                embed.addFields({
-                    name: prod.name || "",
-                    value: `Cena: ${prod.price} | Cena sa popustom: ${prod.discountedPrice} | [Link](${prod.url})`,
-                    inline: false
-                })
+                for (let i = 0; i < products.length; i += PRODUCTS_PER_EMBED) {
+                    const chunk = products.slice(i, i + PRODUCTS_PER_EMBED);
+                    const embed = multiEmbedBuilder(chunk, products.length, storeName, i);
+                    
+                    // Only ping on the first message of a multi-part notification
+                    const contentForThisChunk = (i === 0) ? messageContent : undefined;
+                    await channel.send({ content: contentForThisChunk, embeds: [embed] });
+                }
+                break;
             }
 
-            const contentForFirstChunk = (i === 0) ? messageContent : undefined; 
-            await channel.send({ content: contentForFirstChunk, embeds: [embed] });
+            default:
+                logger.warn(`An unknown pingType was provided: ${pingType}`);
+                break;
         }
     }
 }

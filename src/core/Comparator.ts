@@ -2,13 +2,39 @@ import * as fs from "fs/promises";
 import * as path from "path";
 import { Product } from "../types/Product.js";
 
+export interface ProductChanges {
+    newlyAdded: Product[];
+    restockedProducts: Product[];
+}
+
 const DATA_DIR = path.join(process.cwd(), "data");
 
 export class Comparator {
-    // Finds new products by comparing the new list with the old one
-    public static findNewProducts(oldProducts: Product[], newProducts: Product[]): Product[] {
-        const oldProductUrls = new Set(oldProducts.map(p => p.url));
-        return newProducts.filter(p => !oldProductUrls.has(p.url));
+    public static analysedChanges(oldProducts: Product[], newProducts: Product[]): ProductChanges {
+        const newlyAdded: Product[] = [];
+        const restockedProducts: Product[] = [];
+
+        const oldProductsMap = new Map<string, Product>();
+        for (const product of oldProducts) {
+            oldProductsMap.set(product.url, product);
+        }
+
+        for (const newProduct of newProducts) {
+            const oldProduct = oldProductsMap.get(newProduct.url);
+
+            if (oldProduct) {
+                if ((!oldProduct.inStock) && newProduct.inStock) {
+                    restockedProducts.push(newProduct);
+                }
+                oldProductsMap.delete(newProduct.url);
+            } else {
+                // It does not matter whether the new product is in stock or not.
+                // If it is not in the old list, it is considered newly added.
+                newlyAdded.push(newProduct);
+            }
+        }
+
+        return { newlyAdded, restockedProducts };
     }
 
     // Get previously saved file for a given store

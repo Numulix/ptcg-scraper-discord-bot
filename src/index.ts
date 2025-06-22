@@ -8,6 +8,7 @@ import { dirname } from 'path';
 import { ServerConfigManager } from './core/ServerConfigManager.js';
 import { fileURLToPath } from 'url';
 import { logger } from './core/Logger.js';
+import { PingEnum } from './types/PingEnum.js';
 
 const DISCORD_TOKEN = process.env.DISCORD_TOKEN || "";
 
@@ -39,43 +40,73 @@ async function runChecks() {
             continue;
         }
 
-        const newItems = Comparator.findNewProducts(oldProducts, newProducts);
+        const changes = Comparator.analysedChanges(oldProducts, newProducts);
 
-        if (newItems.length > 0) {
-            logger.info(`Found ${newItems.length} new items for ${scraper.storeName}!`);
-            
-            // 1. Get all server configurations
+        let hadReportableUpdates = false;
+
+        // Handle newly added products
+        if (changes.newlyAdded.length > 0) {
+            hadReportableUpdates = true;
+            logger.info(`Found ${changes.newlyAdded.length} newly added products for ${scraper.storeName}!`);
+
+            const pingType = changes.newlyAdded.length === 1
+                ? PingEnum.SINGLE_NEW
+                : PingEnum.MULTIPLE_NEW;
+
             const allConfigs = await ServerConfigManager.getAllConfigs();
-            const serverIds = Object.keys(allConfigs);
-
-            if (serverIds.length === 0) {
-                logger.warn("No servers have configured this bot.");
-                continue;
-            }
-
-            // 2. Loop through each server that has a configuration
-            for (const guildId of serverIds) {
+            for (const guildId in allConfigs) {
                 const config = allConfigs[guildId];
-
-                // 3. Check if a notification channel is set for the server
                 if (config?.notificationChannelId) {
                     try {
-
                         await bot.sendNewProductNotification(
                             config.notificationChannelId,
                             scraper.logoUrl,
-                            newItems,
-                            config.pingRoleId || ""
-                        )
+                            changes.newlyAdded,
+                            config.pingRoleId || "",
+                            pingType
+                        );
                     } catch (error) {
-                        logger.error(`Failed to send notification to channel ${config.notificationChannelId} in guild ${guildId}.`, error);
+                        logger.error(`Failed to send new product notification to channel ${config.notificationChannelId} in guild ${guildId}.`, error);
                     }
                 }
             }
+        }
 
+        // Handle restocked products
+        if (changes.restockedProducts.length > 0) {
+            hadReportableUpdates = true;
+            logger.info(`Found ${changes.restockedProducts.length} restocked products for ${scraper.storeName}!`);
+
+            const pingType = changes.restockedProducts.length === 1
+                ? PingEnum.SINGLE_RESTOCK
+                : PingEnum.MULTIPLE_RESTOCK;
+
+            const allConfigs = await ServerConfigManager.getAllConfigs();
+            for (const guildId in allConfigs) {
+                const config = allConfigs[guildId];
+                if (config?.notificationChannelId) {
+                    try {
+                        await bot.sendNewProductNotification(
+                            config.notificationChannelId,
+                            scraper.logoUrl,
+                            changes.restockedProducts,
+                            config.pingRoleId || "",
+                            pingType
+                        );
+                    } catch (error) {
+                        logger.error(`Failed to send restock notification to channel ${config.notificationChannelId} in guild ${guildId}.`, error);
+                    }
+                }
+            }
+        }
+
+        // Save the new state and provide final logging
+        if (hadReportableUpdates) {
+            logger.info(`Saving updated product list for ${scraper.storeName}`);
             await Comparator.saveProducts(scraper.storeName, newProducts);
         } else {
-            logger.info(`No new items found for ${scraper.storeName}. Skipping notification.`);
+            logger.info(`No reportable updates for ${scraper.storeName}. No products added or restocked.`);
+            await Comparator.saveProducts(scraper.storeName, newProducts);
         }
     }
 
