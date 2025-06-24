@@ -122,7 +122,7 @@ async function main() {
 
     await bot.connect();
 
-    cron.schedule("* * * * *", runChecks, { timezone: "Europe/Belgrade" });
+    cron.schedule("0 * * * *", runChecks, { timezone: "Europe/Belgrade" });
 
     logger.info("Bot started. Cron job scheduled.");
 }
