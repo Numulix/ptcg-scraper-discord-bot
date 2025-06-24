@@ -3,6 +3,7 @@ import * as cheerio from 'cheerio';
 import { chromium } from "playwright";
 import { Product } from "../types/Product.js";
 import { Scraper } from "./Scraper.js";
+import { logger } from "../core/Logger.js";
 
 export class DelfiScraper extends Scraper {
     public readonly storeName: string = "delfi";
@@ -58,7 +59,7 @@ export class DelfiScraper extends Scraper {
             return products;
 
         } catch (error) {
-            console.error(`Error scraping: ${this.storeName} ${error}`);
+            logger.error(`Error scraping: ${this.storeName} ${error}`);
             return [];
         } finally {
             if (browser) {
